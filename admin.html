@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>동아리원 전용 관리자 페이지</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; text-align: center; }
     .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -26,7 +26,7 @@
 <body>
 
 <div class="container">
-  <h1>👑 실시간 대기 명단 관리 (최종)</h1>
+  <h1>👑 실시간 대기 명단 관리 (보안 차단 해제 버전)</h1>
   <button class="refresh-btn" onclick="fetchWaitingList()">🔄 명단 새로고침</button>
   
   <table>
@@ -51,7 +51,6 @@
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
-  // 최신 라이브러리 전용 호출 방식입니다
   const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function fetchWaitingList() {
