@@ -34,7 +34,9 @@
 <script>
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  // 외부 라이브러리 이름과의 충돌을 피하기 위해 변수명을 'mySupabase'로 변경했습니다.
+  const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function registerWaiting() {
     const name = document.getElementById('cust-name').value.trim();
@@ -46,7 +48,7 @@
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await mySupabase
         .from('waiting')
         .insert([{ name: name, phone: phone, status: '대기중' }]);
 
