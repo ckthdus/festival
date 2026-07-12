@@ -49,13 +49,10 @@
 
 <script>
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
-  // 앞뒤 공백(띄어쓰기)을 완벽하게 제거한 오리지널 anon key입니다.
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
-  // 이름 충돌 방지를 위해 mySupabase 변수명 사용
   const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 대기 명단 가져오기 함수
   async function fetchWaitingList() {
     try {
       const { data, error } = await mySupabase
@@ -99,7 +96,6 @@
     }
   }
 
-  // 팀 호출하기 함수 (상태를 '호출완료'로 변경)
   async function callTeam(id) {
     if (!confirm("해당 팀을 호출하시겠습니까?")) return;
     
@@ -113,14 +109,13 @@
         alert("호출 처리 실패: " + error.message);
       } else {
         alert("호출 완료 처리되었습니다!");
-        fetchWaitingList(); // 명단 새로고침
+        fetchWaitingList();
       }
     } catch (err) {
       alert("오류 발생: " + err.message);
     }
   }
 
-  // 명단에서 삭제하기 함수
   async function deleteTeam(id) {
     if (!confirm("정말 명단에서 삭제하시겠습니까?")) return;
 
@@ -134,14 +129,13 @@
         alert("삭제 실패: " + error.message);
       } else {
         alert("명단에서 삭제되었습니다.");
-        fetchWaitingList(); // 명단 새로고침
+        fetchWaitingList();
       }
     } catch (err) {
       alert("오류 발생: " + err.message);
     }
   }
 
-  // 페이지 열리자마자 자동으로 명단 받아오기 시작
   window.onload = fetchWaitingList;
 </script>
 
