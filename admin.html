@@ -2,16 +2,20 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>관리자 호출 페이지</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { padding: 15px 20px; font-size: 18px; cursor: pointer; }
+    body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
+    .item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    .btn-call { background-color: #28a745; color: white; margin-right: 5px; }
+    .btn-del { background-color: #dc3545; color: white; }
   </style>
 </head>
 <body>
-  <h1>관리자 대기 명단</h1>
-  <div id="list"></div>
+  <h1>👑 대기 명단 관리</h1>
+  <div id="list">데이터를 불러오는 중...</div>
 
   <script>
     const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co'.trim();
@@ -19,34 +23,41 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function loadData() {
-      const { data } = await supabase.from('waiting').select('*');
+      const { data } = await supabase.from('waiting').select('*').order('id', { ascending: true });
       const listDiv = document.getElementById('list');
       listDiv.innerHTML = '';
+      
       data.forEach(item => {
         const div = document.createElement('div');
-        div.innerHTML = `${item.name} (${item.phone}) <button onclick="triggerSMS('${item.phone}', '${item.name}', ${item.id})">호출하기</button>`;
+        div.className = 'item';
+        div.innerHTML = `
+          <div><strong>${item.name}</strong> (${item.phone})</div>
+          <div>
+            <button class="btn-call" onclick="triggerSMS('${item.phone}', '${item.name}', ${item.id})">호출</button>
+            <button class="btn-del" onclick="deleteItem(${item.id})">삭제</button>
+          </div>
+        `;
         listDiv.appendChild(div);
       });
     }
 
-    // 호출 버튼 누르면 무조건 실행되는 함수
+    // 호출 함수
     async function triggerSMS(phone, name, id) {
-      // 1. 먼저 DB 상태 업데이트
       await supabase.from('waiting').update({ status: '호출완료' }).eq('id', id);
-      
-      // 2. 문자 앱 호출 (강제 방식)
       const cleanPhone = phone.replace(/[^0-9]/g, '');
       const msg = encodeURIComponent(`[부스알림] ${name}님, 입장해주세요!`);
       
-      // 3. 실행 확인을 위한 경고창 (반응 있는지 확인)
-      alert("문자 앱을 엽니다.");
-      
-      // 기기에 따라 처리
-      const url = `sms:${cleanPhone}?body=${msg}`;
-      window.location.href = url;
-      
+      window.location.href = `sms:${cleanPhone}?body=${msg}`;
       loadData();
     }
+
+    // 삭제 함수
+    async function deleteItem(id) {
+      if(!confirm("정말 삭제하시겠습니까?")) return;
+      await supabase.from('waiting').delete().eq('id', id);
+      loadData();
+    }
+
     window.onload = loadData;
   </script>
 </body>
