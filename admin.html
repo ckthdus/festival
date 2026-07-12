@@ -13,20 +13,17 @@
     th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
     th { background-color: #007bff; color: white; }
     .btn-call { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-call:hover { background-color: #218838; }
     .btn-cancel { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px; }
-    .btn-cancel:hover { background-color: #c82333; }
     .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
     .status-waiting { background-color: #ffeeba; color: #856404; }
     .status-called { background-color: #d4edda; color: #155724; }
     .refresh-btn { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
-    .refresh-btn:hover { background-color: #5a6268; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>👑 실시간 대기 명단 관리 (보안 차단 해제 버전)</h1>
+  <h1>👑 실시간 대기 명단 관리 (최종 패치)</h1>
   <button class="refresh-btn" onclick="fetchWaitingList()">🔄 명단 새로고침</button>
   
   <table>
@@ -48,6 +45,7 @@
 </div>
 
 <script>
+  // 손님용 코드와 완전히 동일한 주소와 키 세팅입니다.
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
@@ -84,7 +82,7 @@
           <td>${item.phone}</td>
           <td><span class="status-badge ${statusClass}">${item.status}</span></td>
           <td>
-            ${item.status === '대기중' ? `<button class="btn-call" onclick="callTeam(${item.id})">호출</button>` : ''}
+            ${item.status !== '호출완료' ? `<button class="btn-call" onclick="callTeam(${item.id})">호출</button>` : ''}
             <button class="btn-cancel" onclick="deleteTeam(${item.id})">삭제</button>
           </td>
         `;
@@ -96,7 +94,6 @@
   }
 
   async function callTeam(id) {
-    if (!confirm("해당 팀을 호출하시겠습니까?")) return;
     try {
       const { error } = await mySupabase.from('waiting').update({ status: '호출완료' }).eq('id', id);
       if (error) alert("호출 실패: " + error.message);
