@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎪 부스 웨이팅 접수</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f6f9; padding: 40px 20px; text-align: center; margin: 0; }
+    .container { max-width: 500px; margin: 50px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h1 { color: #333; margin-bottom: 30px; font-size: 28px; }
+    label { display: block; text-align: left; font-weight: bold; margin-top: 20px; font-size: 16px; color: #555; }
+    input { width: 100%; padding: 15px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 18px; }
+    button { width: 100%; padding: 18px; background-color: #007BFF; color: white; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; font-weight: bold; margin-top: 30px; }
+    button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎪 동아리 부스 웨이팅</h1>
+    <p style="color:#666; font-size:15px;">차례가 되면 입력하신 번호로 문자가 발송됩니다.</p>
+    
+    <label>팀명 / 대표자 성함</label>
+    <input type="text" id="cust-name" placeholder="예: 홍길동 (3명)">
+    
+    <label>전화번호 (숫자만)</label>
+    <input type="tel" id="cust-phone" placeholder="01012345678">
+    
+    <button onclick="registerWaiting()">대기 등록하기</button>
+  </div>
+
+  <script>
+    // ⚠️ 본인의 Supabase 정보로 꼭 변경하세요!
+    const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_8snDdawnTU1w5fbkeLnIBA_sF2BJFQM.';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function registerWaiting() {
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+
+      if (!name || !phone) return alert("정보를 모두 입력해 주세요!");
+
+      const { error } = await supabase
+        .from('waiting')
+        .insert([{ name, phone, status: '대기중' }]);
+
+      if (error) {
+        alert("접수 실패: " + error.message);
+      } else {
+        alert("🎉 접수가 완료되었습니다! 순서가 되면 문자를 보내드릴게요.");
+        document.getElementById('cust-name').value = '';
+        document.getElementById('cust-phone').value = '';
+      }
+    }
+  </script>
+</body>
+</html>
