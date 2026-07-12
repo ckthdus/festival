@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>동아리원 전용 관리자 페이지</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; text-align: center; }
     .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -26,7 +26,7 @@
 <body>
 
 <div class="container">
-  <h1>👑 실시간 대기 명단 관리</h1>
+  <h1>👑 실시간 대기 명단 관리 (최종)</h1>
   <button class="refresh-btn" onclick="fetchWaitingList()">🔄 명단 새로고침</button>
   
   <table>
@@ -51,6 +51,7 @@
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
+  // 최신 라이브러리 전용 호출 방식입니다
   const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function fetchWaitingList() {
@@ -68,14 +69,13 @@
       const tbody = document.getElementById('waiting-tbody');
       tbody.innerHTML = '';
 
-      if (data.length === 0) {
+      if (!data || data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5">현재 대기 중인 팀이 없습니다.</td></tr>';
         return;
       }
 
       data.forEach((item, index) => {
         const tr = document.createElement('tr');
-        
         let statusClass = 'status-waiting';
         if (item.status === '호출완료') statusClass = 'status-called';
 
@@ -98,46 +98,23 @@
 
   async function callTeam(id) {
     if (!confirm("해당 팀을 호출하시겠습니까?")) return;
-    
     try {
-      const { error } = await mySupabase
-        .from('waiting')
-        .update({ status: '호출완료' })
-        .eq('id', id);
-
-      if (error) {
-        alert("호출 처리 실패: " + error.message);
-      } else {
-        alert("호출 완료 처리되었습니다!");
-        fetchWaitingList();
-      }
-    } catch (err) {
-      alert("오류 발생: " + err.message);
-    }
+      const { error } = await mySupabase.from('waiting').update({ status: '호출완료' }).eq('id', id);
+      if (error) alert("호출 실패: " + error.message);
+      else fetchWaitingList();
+    } catch (err) { alert("오류: " + err.message); }
   }
 
   async function deleteTeam(id) {
     if (!confirm("정말 명단에서 삭제하시겠습니까?")) return;
-
     try {
-      const { error } = await mySupabase
-        .from('waiting')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        alert("삭제 실패: " + error.message);
-      } else {
-        alert("명단에서 삭제되었습니다.");
-        fetchWaitingList();
-      }
-    } catch (err) {
-      alert("오류 발생: " + err.message);
-    }
+      const { error } = await mySupabase.from('waiting').delete().eq('id', id);
+      if (error) alert("삭제 실패: " + error.message);
+      else fetchWaitingList();
+    } catch (err) { alert("오류: " + err.message); }
   }
 
   window.onload = fetchWaitingList;
 </script>
-
 </body>
 </html>
