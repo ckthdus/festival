@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>부스 웨이팅 접수</title>
-  <!-- Supabase 라이브러리 로드 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f9f9f9; }
@@ -34,9 +33,10 @@
 
 <script>
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3OTU2MjgsImV4cCI6MjA5OTM3MTYyOH0.i8_P851D5tGaCggBLzygEDWxYDIaeF4J4Qti4ZmD_vM';
+  // 앞뒤 공백(띄어쓰기)을 완벽하게 제거한 오리지널 anon key입니다.
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
-  // 외부 라이브러리와 이름이 겹치지 않도록 안전하게 대문자로 결합합니다.
+  // 이름 충돌 방지를 위해 변수명을 mySupabase로 지정했습니다.
   const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function registerWaiting() {

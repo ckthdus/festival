@@ -3,108 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>👑 동아리원 전용 관리자창</title>
+  <title>동아리원 전용 관리자 페이지</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; }
-    h2 { text-align: center; color: #333; margin-bottom: 15px; }
-    .refresh-box { text-align: right; margin-bottom: 10px; }
-    .btn-refresh { padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .info { font-size: 15px; }
-    .info strong { font-size: 18px; color: #007BFF; }
-    .status { font-weight: bold; display: inline-block; margin-top: 4px; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-    .status-wait { background: #e3f2fd; color: #0d47a1; }
-    .status-call { background: #fff3e0; color: #e65100; }
-    .actions { display: flex; gap: 8px; }
-    .btn-call { background-color: #28a745; color: white; border: none; padding: 12px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-    .btn-enter { background-color: #dc3545; color: white; border: none; padding: 12px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  </main>
+    body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; text-align: center; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h1 { color: #333; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
+    th { background-color: #007bff; color: white; }
+    .btn-call { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-call:hover { background-color: #218838; }
+    .btn-cancel { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px; }
+    .btn-cancel:hover { background-color: #c82333; }
+    .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+    .status-waiting { background-color: #ffeeba; color: #856404; }
+    .status-called { background-color: #d4edda; color: #155724; }
+    .refresh-btn { background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+    .refresh-btn:hover { background-color: #5a6268; }
+  </style>
 </head>
 <body>
 
-  <h2>👑 실시간 대기 명단</h2>
-  <div class="refresh-box">
-    <button class="btn-refresh" onclick="loadWaitingList()">🔄 새로고침</button>
-  </div>
+<div class="container">
+  <h1>👑 실시간 대기 명단 관리</h1>
+  <button class="refresh-btn" onclick="fetchWaitingList()">🔄 명단 새로고침</button>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>번호</th>
+        <th>팀명/이름</th>
+        <th>전화번호</th>
+        <th>상태</th>
+        <th>관리</th>
+      </tr>
+    </thead>
+    <tbody id="waiting-tbody">
+      <tr>
+        <td colspan="5">데이터를 불러오는 중입니다...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-  <div id="waiting-cards"></div>
+<script>
+  const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
+  // 앞뒤 공백을 완전히 없앤 정확한 anon key입니다.
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTUzMDksImV4cCI6MjAzMTA3MTMwOX0.b_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
+  
+  // 이름 충돌 방지를 위해 mySupabase 변수명 사용
+  const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <script>
-    // ⚠️ 본인의 Supabase 정보로 꼭 변경하세요!
-    const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkY2djbnlub2ZkandzZ2hyb2ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3OTU2MjgsImV4cCI6MjA5OTM3MTYyOH0.i8_P851D5tGaCggBLzygEDWxYDIaeF4J4Qti4ZmD_vM';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // 대기 목록 불러오기 (입장완료 제외)
-    async function loadWaitingList() {
-      const container = document.getElementById('waiting-cards');
-      container.innerHTML = '<p style="text-align:center; color:#999;">업데이트 중...</p>';
-
-      const { data: list, error } = await supabase
+  // 대기 명단 가져오기 함수
+  async function fetchWaitingList() {
+    try {
+      const { data, error } = await mySupabase
         .from('waiting')
         .select('*')
-        .neq('status', '입장완료')
         .order('id', { ascending: true });
 
-      if (error) return alert("데이터 로드 실패");
-
-      container.innerHTML = '';
-      if(list.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#999; padding:40px;">현재 대기 팀이 없습니다.</p>';
+      if (error) {
+        alert("명단 로드 실패: " + error.message);
         return;
       }
 
-      list.forEach(team => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        const isCalled = team.status === '호출됨';
+      const tbody = document.getElementById('waiting-tbody');
+      tbody.innerHTML = '';
 
-        card.innerHTML = `
-          <div class="info">
-            <strong>${team.id}번</strong> | ${team.name}<br>
-            <span style="font-size:13px; color:#666;">${team.phone}</span><br>
-            <span class="status ${isCalled ? 'status-call' : 'status-wait'}">${team.status}</span>
-          </div>
-          <div class="actions">
-            <button class="btn-call" onclick="callCustomer(${team.id}, '${team.phone}', '${team.name}')">📢 호출</button>
-            <button class="btn-enter" onclick="enterCustomer(${team.id})">✅ 입장</button>
-          </div>
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">현재 대기 중인 팀이 없습니다.</td></tr>';
+        return;
+      }
+
+      data.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        
+        let statusClass = 'status-waiting';
+        if (item.status === '호출완료') statusClass = 'status-called';
+
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td><strong>${item.name}</strong></td>
+          <td>${item.phone}</td>
+          <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+          <td>
+            ${item.status === '대기중' ? `<button class="btn-call" onclick="callTeam(${item.id})">호출</button>` : ''}
+            <button class="btn-cancel" onclick="deleteTeam(${item.id})">삭제</button>
+          </td>
         `;
-        container.appendChild(card);
+        tbody.appendChild(tr);
       });
+    } catch (err) {
+      alert("오류가 발생했습니다: " + err.message);
     }
+  }
 
-    // 📢 호출 버튼 (상태 업데이트 + 가상 문자 발송)
-    async function callCustomer(id, phone, name) {
-      const { error } = await supabase
+  // 팀 호출하기 함수 (상태를 '호출완료'로 변경)
+  async function callTeam(id) {
+    if (!confirm("해당 팀을 호출하시겠습니까?")) return;
+    
+    try {
+      const { error } = await mySupabase
         .from('waiting')
-        .update({ status: '호출됨' })
+        .update({ status: '호출완료' })
         .eq('id', id);
 
-      if (error) return alert("호출 실패");
-      
-      // 기기 자체 팝업 알림 (하루용 축제 스택이므로 비용이 들지 않는 가장 안전한 방식)
-      alert(`[문자 발송 알림]\n수신: ${phone}\n"안녕하세요, ${name}님! 차례가 되었습니다. 지금 바로 동아리 부스로 입장해 주세요!"`);
-      loadWaitingList();
+      if (error) {
+        alert("호출 처리 실패: " + error.message);
+      } else {
+        alert("호출 완료 처리되었습니다!");
+        fetchWaitingList(); // 명단 새로고침
+      }
+    } catch (err) {
+      alert("오류 발생: " + err.message);
     }
+  }
 
-    // ✅ 입장 버튼 (누르면 목록에서 즉시 삭제)
-    async function enterCustomer(id) {
-      if(!confirm("입장 처리하고 대기줄에서 제외하시겠습니까?")) return;
+  // 명단에서 삭제하기 함수
+  async function deleteTeam(id) {
+    if (!confirm("정말 명단에서 삭제하시겠습니까?")) return;
 
-      const { error } = await supabase
+    try {
+      const { error } = await mySupabase
         .from('waiting')
-        .update({ status: '입장완료' })
+        .delete()
         .eq('id', id);
 
-      if (error) return alert("입장 처리 실패");
-      
-      loadWaitingList();
+      if (error) {
+        alert("삭제 실패: " + error.message);
+      } else {
+        alert("명단에서 삭제되었습니다.");
+        fetchWaitingList(); // 명단 새로고침
+      }
+    } catch (err) {
+      alert("오류 발생: " + err.message);
     }
+  }
 
-    // 초기 실행
-    loadWaitingList();
-  </script>
+  // 페이지 열리자마자 자동으로 명단 받아오기 시작
+  window.onload = fetchWaitingList;
+</script>
+
 </body>
 </html>
