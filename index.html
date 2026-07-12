@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>부스 웨이팅 접수</title>
+  <!-- Supabase 라이브러리 로드 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f9f9f9; }
@@ -35,7 +36,7 @@
   const SUPABASE_URL = 'https://cdcgcnynofdjwsghrofs.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_8snDdawnTU1w5fbkeLnlBA_sF2BJFQM';
   
-  // 외부 라이브러리 이름과의 충돌을 피하기 위해 변수명을 'mySupabase'로 변경했습니다.
+  // 외부 라이브러리와 이름이 겹치지 않도록 안전하게 대문자로 결합합니다.
   const mySupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function registerWaiting() {
