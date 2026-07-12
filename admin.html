@@ -7,13 +7,18 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
     button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
     .btn-call { background-color: #28a745; color: white; }
+    .btn-refresh { background-color: #007bff; color: white; }
   </style>
 </head>
 <body>
-  <h1>👑 호출 후 자동 삭제 관리</h1>
+  <div class="header">
+    <h1>👑 대기 명단 관리</h1>
+    <button class="btn-refresh" onclick="loadData()">🔄 새로고침</button>
+  </div>
   <div id="list">데이터를 불러오는 중...</div>
 
   <script>
@@ -42,17 +47,14 @@
       });
     }
 
-    // 호출 버튼 하나로 두 가지 일을 동시에 처리
     async function callAndRemove(id, phone, name) {
-      // 1. 문자 앱 실행
       const cleanPhone = phone.replace(/[^0-9]/g, '');
       const msg = encodeURIComponent(`[부스알림] ${name}님, 입장해주세요!`);
       window.location.href = `sms:${cleanPhone}?body=${msg}`;
       
-      // 2. 서버에서 즉시 삭제
       await supabase.from('waiting').delete().eq('id', id);
       
-      // 3. 목록 새로고침
+      // 호출 즉시 목록 반영
       loadData();
     }
 
