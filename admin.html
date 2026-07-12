@@ -6,18 +6,20 @@
   <title>관리자 호출 페이지</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2.43.0/dist/umd/supabase.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; background-color: #f8f9fa; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-    button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    body { font-family: sans-serif; padding: 10px; background-color: #f8f9fa; margin: 0; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    h1 { font-size: 18px; margin: 0; }
+    .item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info { margin-bottom: 8px; font-size: 15px; }
+    button { width: 100%; padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; }
     .btn-call { background-color: #28a745; color: white; }
-    .btn-refresh { background-color: #007bff; color: white; }
+    .btn-refresh { background-color: #007bff; color: white; width: auto; padding: 8px 12px; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>👑 대기 명단 관리</h1>
-    <button class="btn-refresh" onclick="loadData()">🔄 새로고침</button>
+    <h1>대기 명단</h1>
+    <button class="btn-refresh" onclick="loadData()">새로고침</button>
   </div>
   <div id="list">데이터를 불러오는 중...</div>
 
@@ -32,7 +34,7 @@
       listDiv.innerHTML = '';
       
       if (!data || data.length === 0) {
-        listDiv.innerHTML = '대기 중인 팀이 없습니다.';
+        listDiv.innerHTML = '<div class="item">대기 중인 팀이 없습니다.</div>';
         return;
       }
 
@@ -40,7 +42,7 @@
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
-          <div><strong>${item.name}</strong> (${item.phone})</div>
+          <div class="info"><strong>${item.name}</strong><br>${item.phone}</div>
           <button class="btn-call" onclick="callAndRemove(${item.id}, '${item.phone}', '${item.name}')">호출 후 삭제</button>
         `;
         listDiv.appendChild(div);
@@ -51,10 +53,7 @@
       const cleanPhone = phone.replace(/[^0-9]/g, '');
       const msg = encodeURIComponent(`[부스알림] ${name}님, 입장해주세요!`);
       window.location.href = `sms:${cleanPhone}?body=${msg}`;
-      
       await supabase.from('waiting').delete().eq('id', id);
-      
-      // 호출 즉시 목록 반영
       loadData();
     }
 
